@@ -31,6 +31,22 @@ func (e *ErrorOutput) Error() error {
 	return errors.New(e.Message)
 }
 
+type ErrorsListOutput []struct {
+	FieldNames     []string `json:"fieldNames"`
+	Classification string   `json:"classification"`
+	Message        string   `json:"message"`
+}
+
+func (e *ErrorsListOutput) Error() error {
+	messages := []string{}
+
+	for _, f := range *e {
+		messages = append(messages, strings.Join(f.FieldNames, ", ")+" "+f.Message)
+	}
+
+	return errors.New(strings.Join(messages, ". "))
+}
+
 type Logger interface {
 	Println(v ...interface{})
 }
@@ -134,7 +150,12 @@ func (c *Client) send(request *http.Request, output interface{}) error {
 		return err
 	}
 
-	if response.StatusCode >= 400 {
+	if response.StatusCode == http.StatusUnprocessableEntity {
+		errorOut := &ErrorsListOutput{}
+		if err := json.Unmarshal(body, errorOut); err == nil {
+			return errorOut.Error()
+		}
+	} else if response.StatusCode >= 400 {
 		errorOut := &ErrorOutput{}
 		if err := json.Unmarshal(body, errorOut); err == nil {
 			return errorOut.Error()
@@ -166,6 +187,14 @@ func StringSlice(src []string) []*string {
 		dst[i] = &(src[i])
 	}
 	return dst
+}
+
+func TimeValue(v *time.Time) time.Time {
+	if v != nil {
+		return *v
+	}
+
+	return time.Time{}
 }
 
 func MillisecondsTimeValue(v *int64) time.Time {
