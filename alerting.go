@@ -34,6 +34,28 @@ const (
 	AlertTypeWebhook        = "webhook"
 )
 
+type GetAlertsStatesForDashboardInput struct {
+	DashboardId *int64 `url:"dashboardId,omitempty"`
+}
+
+type GetAlertsStatesForDashboardOutput []struct {
+	Id           *int64     `json:"id,omitempty"`
+	DashboardId  *int64     `json:"dashboardId,omitempty"`
+	PanelId      *int64     `json:"panelId,omitempty"`
+	State        *string    `json:"state,omitempty"`
+	NewStateDate *time.Time `json:"newStateDate,omitempty"`
+}
+
+func (c *Client) GetAlertsStatesForDashboard(ctx context.Context, input *GetAlertsStatesForDashboardInput) (*GetAlertsStatesForDashboardOutput, error) {
+	request, err := c.newRequest(ctx, http.MethodGet, "/alerts/states-for-dashboard", input)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &GetAlertsStatesForDashboardOutput{}
+	return output, c.send(request, output)
+}
+
 type GetAlertNotifiersInput struct {
 }
 
@@ -86,6 +108,8 @@ type GetAlertNotificationTestOutput struct {
 	Message *string `json:"message"`
 }
 
+// @Role viewer
+// @Role admin
 func (c *Client) GetAlertNotificationTest(ctx context.Context, input *GetAlertNotificationTestInput) (*GetAlertNotificationTestOutput, error) {
 	request, err := c.newRequest(ctx, http.MethodPost, "/alert-notifications/test", input)
 	if err != nil {
@@ -113,6 +137,8 @@ type CreateAlertNotificationOutput struct {
 	Updated   time.Time              `json:"updated,omitempty"`
 }
 
+// @Role viewer
+// @Role admin
 func (c *Client) CreateAlertNotification(ctx context.Context, input *CreateAlertNotificationInput) (*CreateAlertNotificationOutput, error) {
 	request, err := c.newRequest(ctx, http.MethodPost, "/alert-notifications/", input)
 	if err != nil {
@@ -137,6 +163,8 @@ type GetAlertNotificationOutput struct {
 	Updated   time.Time              `json:"updated,omitempty"`
 }
 
+// @Role viewer
+// @Role admin
 func (c *Client) GetAlertNotification(ctx context.Context, input *GetAlertNotificationInput) (*GetAlertNotificationOutput, error) {
 	id := Int64Value(input.Id)
 	input.Id = nil
@@ -168,6 +196,8 @@ type UpdateAlertNotificationOutput struct {
 	Updated   time.Time              `json:"updated,omitempty"`
 }
 
+// @Role viewer
+// @Role admin
 func (c *Client) UpdateAlertNotification(ctx context.Context, input *UpdateAlertNotificationInput) (*UpdateAlertNotificationOutput, error) {
 	id := Int64Value(input.Id)
 
@@ -188,6 +218,8 @@ type DeleteAlertNotificationOutput struct {
 	Message *string `json:"message,omitempty"`
 }
 
+// @Role viewer
+// @Role admin
 func (c *Client) DeleteAlertNotification(ctx context.Context, input *DeleteAlertNotificationInput) (*DeleteAlertNotificationOutput, error) {
 	id := Int64Value(input.Id)
 	input.Id = nil
