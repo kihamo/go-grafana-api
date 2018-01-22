@@ -165,6 +165,10 @@ func (c *Client) send(request *http.Request, output interface{}) error {
 	return json.Unmarshal(body, output)
 }
 
+func Bool(v bool) *bool {
+	return &v
+}
+
 func Int64(v int64) *int64 {
 	return &v
 }
